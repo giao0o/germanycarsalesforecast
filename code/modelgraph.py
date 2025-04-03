@@ -18,9 +18,9 @@ def preprocess_data(df):
     df['车型'] = df['车型'].str.upper().str.strip()
     df['车型'] = df['车型'].replace({
         'SONSTIGE': '其他',
-        '3': '车型3',
-        '4': '车型4',
-        '5': '车型5'
+        '3': 'MG 3',
+        '4': 'MG 4',
+        '5': 'MG 5'
     })
     
     # 添加季度信息
