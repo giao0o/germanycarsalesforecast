@@ -1,7 +1,7 @@
 import requests
 import os
 import time
-
+# 本程序用于从KBA Kraftfahrtbundesamt 自动批量下载德国各品牌汽车每月销售统计表（FZ10）
 # 创建下载目录
 download_dir = "./kba_downloads_monthly"
 os.makedirs(download_dir, exist_ok=True)

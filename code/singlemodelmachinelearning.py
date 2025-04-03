@@ -7,9 +7,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 
+# 本程序通过使用机器学习模型预测未来3-5个月的某车系的月销量
 # 配置参数
-data_path = "/Users/jianaoli/germanycarsalesforecast/processed_reports/车型报告/MG_RX6_销量报告.csv"
-output_dir = Path("sales_forecast")
+# 修改为对应csv文件
+data_path = "/Users/jianaoli/germanycarsalesforecast/processed_reports/车型报告/MG_5_销量报告.csv"
+# 修改为对应文件夹
+output_dir = Path("sales_forecast_mg5")
 output_dir.mkdir(exist_ok=True)
 
 def create_features(df):
@@ -149,9 +152,9 @@ def main():
     # 最终模型训练
     final_model = train_model(X, y)
     
-    # 预测未来三个月
+    # 预测未来6个月 （可以改）
     last_data_point = X.iloc[[-1]].copy()
-    forecast_steps = 3
+    forecast_steps = 6
     predictions = forecast(final_model, last_data_point, forecast_steps)
     
     # 生成预测时间索引
@@ -166,7 +169,7 @@ def main():
     plt.figure(figsize=(10, 5))
     plt.plot(feature_df.index, feature_df['总销量'], label='Historical')
     plt.plot(forecast_dates, predictions, marker='o', color='red', label='Forecast')
-    plt.title('RX6 Sales Forecast')
+    plt.title('MG5 Sales Forecast') #修改为相应车型
     plt.xlabel('Date')
     plt.ylabel('Sales')
     plt.legend()

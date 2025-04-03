@@ -5,6 +5,7 @@ from glob import glob
 import warnings
 warnings.filterwarnings('ignore')
 
+# 本程序用于从KBA下载的德国各品牌汽车每月销售统计表（FZ10）自动整理相应的数据为csv和xlsx格式，以做进一步分析，如MG品牌所有车型
 # 配置路径
 input_dir = "./kba_downloads"
 output_dir = "./processed_reports"

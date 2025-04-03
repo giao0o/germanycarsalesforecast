@@ -1,9 +1,7 @@
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns  # 新增的导入
-from plotly.subplots import make_subplots
 from pathlib import Path
 
 # 配置参数
@@ -33,7 +31,7 @@ def preprocess_data(df):
 def generate_analysis(df):
     # 1. 总销量趋势（交互式）
     fig_total = px.area(
-        df.groupby('日期')['总销量'].sum().reset_index(),
+        df.groupby('日期')['总销量'].sum().reset_index().sort_values('日期'),
         x='日期',
         y='总销量',
         title='每月总销量趋势',
@@ -44,8 +42,11 @@ def generate_analysis(df):
     
     # 2. 车型销量排行榜（动态）
     top_models = df.groupby('车型')['总销量'].sum().nlargest(10).index
+    ranking_df = df[df['车型'].isin(top_models)].groupby(['车型', '季度'])['总销量'].sum().reset_index()
+    ranking_df['季度'] = pd.Categorical(ranking_df['季度'], categories=sorted(df['季度'].unique()), ordered=True)
+    
     fig_ranking = px.bar(
-        df[df['车型'].isin(top_models)].groupby(['车型', '季度'])['总销量'].sum().reset_index(),
+        ranking_df.sort_values('季度'),
         x='季度',
         y='总销量',
         color='车型',
@@ -57,8 +58,11 @@ def generate_analysis(df):
     fig_ranking.write_html(output_dir/"model_ranking.html")
 
     # 3. 各车型销售趋势（分面图）
+    trend_df = df.groupby(['日期', '车型'])['总销量'].sum().reset_index()
+    trend_df = trend_df.sort_values('日期')
+    
     fig_models = px.line(
-        df.groupby(['日期', '车型'])['总销量'].sum().reset_index(),
+        trend_df,
         x='日期',
         y='总销量',
         color='车型',
@@ -79,6 +83,7 @@ def generate_analysis(df):
         aggfunc='sum',
         fill_value=0
     ).astype(int)
+    heatmap_data = heatmap_data.reindex(sorted(heatmap_data.columns), axis=1)  # 确保月份排序
     
     sns.heatmap(
         heatmap_data, 
@@ -89,31 +94,12 @@ def generate_analysis(df):
         linewidths=.5
     )
     
-    sns.heatmap(heatmap_data, cmap='YlGnBu', annot=True, fmt="d")
-    plt.title('年度-月度销量热力图')
-    plt.xlabel('月份')
-    plt.ylabel('年份')
+    plt.title('Heatmap Sales Year-Month')
+    plt.xlabel('Month')
+    plt.ylabel('Year')
     plt.savefig(output_dir/"heatmap.png", dpi=300, bbox_inches='tight')
     
-    # 5. 动态排名变化（GIF）
-    # 需要安装bar_chart_race：pip install bar_chart_race
-    try:
-        from bar_chart_race import bar_chart_race
-        race_df = df.pivot_table(
-            index='日期',
-            columns='车型',
-            values='总销量',
-            aggfunc='sum'
-        ).fillna(0).cumsum()
-        bar_chart_race(
-            df=race_df,
-            filename=output_dir/"race.mp4",
-            n_bars=10,
-            filter_column_colors=True,
-            title='车型销量累计排名变化'
-        )
-    except ImportError:
-        print("如需生成动态排名视频，请安装bar_chart_race库")
+    print("分析报告已生成。")
 
 if __name__ == "__main__":
     # 读取数据
